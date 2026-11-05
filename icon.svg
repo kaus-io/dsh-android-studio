@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Android Workbench">
+  <defs>
+    <linearGradient id="workbench" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#176c66"/>
+      <stop offset="1" stop-color="#113c50"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#workbench)"/>
+  <g stroke="#e4fff5" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <rect x="12" y="9" width="29" height="46" rx="6"/>
+    <path d="M23 15h7M24 48h5"/>
+    <path d="m23 24 11 8-11 8Z" fill="#85e8bb" stroke="#85e8bb"/>
+    <path d="M50 17v25m-4-21 4-4 4 4m-4 7h6v8h-6m0 6v5"/>
+  </g>
+  <circle cx="50" cy="49" r="2.8" fill="#85e8bb"/>
+</svg>
