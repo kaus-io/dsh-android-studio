@@ -1,6 +1,7 @@
 /**
  * Engine tests: pure token/fold/outline/layout behavior, runnable without a
- * browser. They import the TypeScript sources directly (Node strips types).
+ * browser. The test sources import the TypeScript engine directly; `build:tools`
+ * compiles them to `.mjs` before Node runs them.
  */
 import assert from 'node:assert/strict'
 import test from 'node:test'
@@ -15,11 +16,13 @@ import { languageForPath, specById, REGISTERED_EXTENSIONS } from '../src/reader/
 import { extractOutline, symbolChain } from '../src/reader/engine/outline.ts'
 import { findInText, findUsages } from '../src/reader/engine/search.ts'
 
-const analyze = (text, lang) => analyzeText(text, lang)
+type Tokens = ReturnType<typeof analyzeText>['tokens']
 
-const kinds = (tokens, line) => (tokens[line] ?? []).map((token) => `${token.kind}:${token.text}`)
+const analyze = (text: string, lang: string) => analyzeText(text, lang)
 
-const reconstruct = (lines, tokens) => {
+const kinds = (tokens: ReturnType<typeof tokenize>, line: number) => (tokens[line] ?? []).map((token) => `${token.kind}:${token.text}`)
+
+const reconstruct = (lines: readonly string[], tokens: Tokens) => {
   for (let line = 0; line < lines.length; line++) {
     const joined = (tokens[line] ?? []).map((token) => token.text).join('')
     assert.equal(joined, lines[line], `line ${line} tokens must concatenate back`)
@@ -238,7 +241,7 @@ test('search reports line/column matches, case and regex options', () => {
 
 test('layout hides folded lines and maps them back to the fold start row', () => {
   const lines = ['a', 'b', 'c', 'd', 'e']
-  const folds = [{ start: 1, end: 3, kind: 'block' }]
+  const folds = [{ start: 1, end: 3, kind: 'block' as const }]
   const layout = buildLayout(lines, folds, new Set([1]), false, 80)
   assert.deepEqual(layout.rows.map((row) => row.line), [0, 1, 4])
   assert.equal(layout.hiddenByStart.get(1), 2)

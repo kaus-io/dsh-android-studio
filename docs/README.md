@@ -4,19 +4,28 @@
 
 ## 安装
 
-先安装并运行 DSH Web，再克隆本仓库：
+先安装并运行 DSH Web；插件声明兼容 DSH `>=0.2.1-rc.3`。在运行 Web 的 profile 中安装，`web` 可替换为实际 profile 名：
+
+```sh
+dsh plugin --profile web add @kaus-io/dsh-android-studio@1.0.0-alpha01
+```
+
+安装后刷新页面；如宿主提示需要重启，重启原来的 DSH 进程再刷新。
+
+若要从源码开发，克隆本仓库并构建，然后在 DSH 插件管理中安装本地组合包：
 
 ```sh
 git clone https://github.com/kaus-io/dsh-android-studio.git
+cd dsh-android-studio
+pnpm install
+pnpm run build
 ```
-
-在 DSH 插件管理中选择安装组合包，填写仓库的**实际绝对路径**：
 
 ```text
 link:/绝对路径/dsh-android-studio
 ```
 
-仓库已包含运行产物，使用时无需先构建。安装到运行 Web 的 profile 后刷新页面；如宿主提示需要重启，重启原来的 DSH 进程再刷新。本地链接依赖仓库目录，请勿随意移动或删除。
+npm 与本地链接二选一，替换前先移除旧来源。仓库已包含运行产物，使用时无需先构建。本地链接依赖仓库目录，请勿随意移动或删除。
 
 若曾安装旧版 Android 工作台（`@local/android-workbench` 或 `@local/android-studio`），先卸载或停用旧插件，避免重复工具栏。
 
@@ -45,10 +54,12 @@ link:/绝对路径/dsh-android-studio
 
 ```sh
 pnpm install
-pnpm run build:client
+pnpm run build
 pnpm run typecheck
 pnpm test
 pnpm run smoke
 ```
+
+所有自有源码都是 TypeScript：Host 的 `index.ts` / `runner.ts` / `android.ts` 由 `pnpm run build:host` 生成同名 `.js`（提交），客户端由 `pnpm run build:client` 把 `client.view.ts` / `ui-model.ts` 等打进 `client.js`；工具与测试脚本由 `pnpm run build:tools` 编译成 `.mjs` 后再执行，生成的 `.mjs` 不入库。
 
 测试使用模拟项目与 runner，不验证真实设备、Gradle 构建或签名环境。报告 Android 问题时，请提供 DSH 版本、系统与工具链环境、复现步骤及已脱敏的错误信息。

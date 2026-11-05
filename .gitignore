@@ -3,3 +3,11 @@ coverage/
 *.tgz
 *.log
 .client.build.js
+
+# 由 *.ts 编译出的工具与测试产物 / Compiled tooling and test output
+/build-client.mjs
+/build-host.mjs
+/smoke.mjs
+/scripts/*.mjs
+/tests/*.mjs
+/*.test.mjs

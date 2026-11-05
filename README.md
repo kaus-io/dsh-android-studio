@@ -1,6 +1,6 @@
 ### DSH Android Studio
 
-![language-typescript](https://img.shields.io/badge/language-typescript-orange.svg) ![dsh-plugin](https://img.shields.io/badge/dsh-plugin-4D6BFE)
+![language-typescript](https://img.shields.io/badge/language-typescript-orange.svg) ![dsh-plugin](https://img.shields.io/badge/dsh-plugin-4D6BFE) [![npm](https://img.shields.io/npm/v/@kaus-io/dsh-android-studio?label=npm)](https://www.npmjs.com/package/@kaus-io/dsh-android-studio)
 
 ### 介绍
 

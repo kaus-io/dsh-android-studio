@@ -12,11 +12,11 @@ import { CodeReader } from './view/CodeReader.tsx'
 import { installStyles } from './view/styles.ts'
 
 /** Implementation id inside the document-preview registry. */
-export const READER_ID = '@local/dsh-android-studio/code-reader'
+export const READER_ID = '@kaus-io/dsh-android-studio/code-reader'
 /** Locale namespace owned by the merged reader. */
 export const READER_NS = 'androidStudioCodeReader'
 
-const STYLE_ID = '@local/dsh-android-studio/CodeReader.css'
+const STYLE_ID = '@kaus-io/dsh-android-studio/CodeReader.css'
 
 interface Translate {
   (key: string, params?: Readonly<Record<string, string | number>>): string

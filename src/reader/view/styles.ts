@@ -1,6 +1,6 @@
 /** 阅读器样式：Xcode 风格语法配色与紧凑编辑器。 / Reader styles: Xcode-style syntax colours in a compact editor. */
 
-export const STYLE_ID = '@local/dsh-android-studio/CodeReader.css'
+export const STYLE_ID = '@kaus-io/dsh-android-studio/CodeReader.css'
 
 const CSS = `
 .dcr_root{
@@ -292,7 +292,7 @@ export function installStyles(styleId: string = STYLE_ID): () => void {
   const existing = document.querySelector(`style[data-plugin-css=${JSON.stringify(styleId)}]`)
   if (existing !== null) return () => {}
   const tag = document.createElement('style')
-  tag.dataset.plugin = '@local/dsh-android-studio'
+  tag.dataset.plugin = '@kaus-io/dsh-android-studio'
   tag.dataset.pluginCss = styleId
   tag.textContent = CSS
   document.head.appendChild(tag)

@@ -1,10 +1,20 @@
 {
-  "name": "@local/dsh-android-studio",
-  "version": "1.0.0",
-  "private": true,
+  "name": "@kaus-io/dsh-android-studio",
+  "version": "1.0.0-alpha01",
   "description": "Android Studio for DSH: the resident Android workbench (ADB, run/build/sign, task output) plus an IDE-grade code reader for Sidebar document previews",
   "type": "module",
   "license": "MIT",
+  "packageManager": "pnpm@10.28.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaus-io/dsh-android-studio.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "dsh": ">=0.2.1-rc.3"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
@@ -16,21 +26,26 @@
     "runner.js",
     "android.js",
     "client.js",
-    "client.view.js",
-    "ui-model.js",
-    "build-client.mjs",
     "tsconfig.json",
     "src",
+    "README.md",
+    "docs/README.md",
+    "CHANGELOG.md",
     "cordis.patch.yml",
     "locale/*.json",
     "icon.svg",
     "AGENTS.md"
   ],
   "scripts": {
+    "build": "pnpm run build:tools && pnpm run build:host && pnpm run build:client",
+    "build:host": "node build-host.mjs",
     "build:client": "node build-client.mjs",
-    "typecheck": "tsc -p tsconfig.json",
-    "test": "node build-client.mjs --check && node --test *.test.js tests/*.test.mjs",
-    "smoke": "node smoke.mjs"
+    "build:tools": "esbuild build-host.ts build-client.ts smoke.ts scripts/check-versions.ts scripts/dist-tag.ts tests/check-versions.test.ts tests/dist-tag.test.ts tests/reader-engine.test.ts tests/reader-robustness.test.ts action.test.ts android.test.ts card-model.test.ts client-contract.test.ts index.test.ts observe.test.ts popup-model.test.ts runner.test.ts sign.test.ts ui-model.test.ts --bundle --packages=external --format=esm --platform=node --target=node22 --outdir=. --outbase=. --out-extension:.js=.mjs --log-level=warning",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.host.json && tsc -p tsconfig.tools.json",
+    "test": "pnpm run build:tools && pnpm run build:host && node --test *.test.mjs tests/*.test.mjs && node smoke.mjs",
+    "smoke": "pnpm run build:tools && node smoke.mjs",
+    "check:versions": "pnpm run build:tools && node scripts/check-versions.mjs",
+    "dist-tag": "pnpm run build:tools && node scripts/dist-tag.mjs"
   },
   "dsh": {
     "bundle": {

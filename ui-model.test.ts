@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { selectCurrentSession, reconcileModule, chooseDevice, runBlockedReason, wizardSteps, wizardError, wizardRequest, suggestSignedOutput, artifactRows, mergeJobFrame, UI_OUTPUT_LIMIT } from './ui-model.js';
+import { selectCurrentSession, reconcileModule, chooseDevice, runBlockedReason, wizardSteps, wizardError, wizardRequest, suggestSignedOutput, artifactRows, mergeJobFrame, UI_OUTPUT_LIMIT } from './ui-model.ts';
 
 const project = { root: '/project', modules: [
   { path: ':app', defaultVariant: 'Bugly_off_Jiagu_off_Debug' },
@@ -105,7 +105,7 @@ test('job observation merges bounded plain text, byte cursors and terminal resul
   const done = mergeJobFrame(duplicate, { job: { ...job, status: 'completed' }, output: { chunks: [{ at: 7, text: 'OK\n' }], next: 10 }, result: { artifacts: [{ path: '/project/app.apk' }] } });
   assert.equal(done.output, '构建\nOK\n');
   assert.equal(done.result.artifacts[0].path, '/project/app.apk');
-  assert.equal(done.job.status, 'completed');
+  assert.equal(done.job!.status, 'completed');
   assert.equal(mergeJobFrame(done, { job: { id: 'foreign' } }), done);
 });
 

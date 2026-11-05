@@ -4,33 +4,33 @@ import { EventEmitter } from 'node:events';
 import { Readable } from 'node:stream';
 import { createSignHandler, SIGN_PATH, validateRequest } from './index.js';
 
-function fakeRequest(body, headers = {}) {
-  const request = Readable.from([Buffer.from(body)]);
+function fakeRequest(body: any, headers: Record<string, string> = {}): any {
+  const request: any = Readable.from([Buffer.from(body)]);
   request.method = 'POST';
   request.headers = { 'x-awb-observe': '1', ...headers };
   return request;
 }
 
-function fakeResponse() {
-  const response = new EventEmitter();
+function fakeResponse(): any {
+  const response: any = new EventEmitter();
   response.writableEnded = false;
   response.destroyed = false;
-  response.writeHead = status => { response.status = status; };
-  response.end = body => { response.writableEnded = true; response.body = JSON.parse(body); };
+  response.writeHead = (status: any) => { response.status = status; };
+  response.end = (body: any) => { response.writableEnded = true; response.body = JSON.parse(body); };
   return response;
 }
 
-const payload = extra => JSON.stringify({ sessionId: 'card-a', args: { action: 'sign', artifact: '/p/a.apk', keystore: '/k/r.jks', alias: 'release', output: '/p/s.apk' }, credentials: { storePassword: 'store-secret', keyPassword: 'key-secret' }, ...extra });
+const payload = (extra?: any) => JSON.stringify({ sessionId: 'card-a', args: { action: 'sign', artifact: '/p/a.apk', keystore: '/k/r.jks', alias: 'release', output: '/p/s.apk' }, credentials: { storePassword: 'store-secret', keyPassword: 'key-secret' }, ...extra });
 
-function service(calls, fail = null) {
+function service(calls: any[], fail: string | null = null): any {
   return {
-    ctx: { agents: { get: id => (id === 'card-a' ? { id } : undefined) }, connection: { browserPeer: { id: 'browser' }, admit: () => ({ peer: { id: 'browser' } }) } },
-    execute: async (args, context) => { calls.push({ args, context }); if (fail) throw new Error(fail); return { jobId: 'job-1', status: 'running' }; },
+    ctx: { agents: { get: (id: string) => (id === 'card-a' ? { id } : undefined) }, connection: { browserPeer: { id: 'browser' }, admit: () => ({ peer: { id: 'browser' } }) } },
+    execute: async (args: any, context: any) => { calls.push({ args, context }); if (fail) throw new Error(fail); return { jobId: 'job-1', status: 'running' }; },
   };
 }
 
 test('the signing endpoint passes one-shot credentials to the same Host service', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createSignHandler(service(calls), () => 'http://127.0.0.1:3080');
   const response = fakeResponse();
   await handler(fakeRequest(payload()), response);
@@ -43,7 +43,7 @@ test('the signing endpoint passes one-shot credentials to the same Host service'
 });
 
 test('only package and sign may use the credential channel', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createSignHandler(service(calls));
   for (const action of ['project', 'run', 'build', 'install', 'uninstall', 'devices']) {
     const response = fakeResponse();
@@ -54,7 +54,7 @@ test('only package and sign may use the credential channel', async () => {
 });
 
 test('missing or malformed credentials never reach the service', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createSignHandler(service(calls));
   const bodies = [
     JSON.stringify({ sessionId: 'card-a', args: { action: 'sign' } }),
@@ -73,7 +73,7 @@ test('missing or malformed credentials never reach the service', async () => {
 });
 
 test('the signing endpoint enforces header, origin and session exactly as observation does', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createSignHandler(service(calls), () => 'http://127.0.0.1:3080');
   const noHeader = fakeResponse();
   await handler(fakeRequest(payload(), { 'x-awb-observe': '' }), noHeader);

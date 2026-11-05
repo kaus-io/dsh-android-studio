@@ -4,31 +4,31 @@ import { EventEmitter } from 'node:events';
 import { Readable } from 'node:stream';
 import { createObserveHandler, OBSERVE_PATH, OBSERVE_ACTIONS, sameLoopbackOrigin } from './index.js';
 
-function fakeRequest(body, headers = {}, method = 'POST') {
-  const request = Readable.from([Buffer.from(body)]);
+function fakeRequest(body: any, headers: Record<string, string> = {}, method = 'POST'): any {
+  const request: any = Readable.from([Buffer.from(body)]);
   request.method = method;
   request.headers = { 'x-awb-observe': '1', ...headers };
   return request;
 }
 
-function fakeResponse() {
-  const response = new EventEmitter();
+function fakeResponse(): any {
+  const response: any = new EventEmitter();
   response.writableEnded = false;
   response.destroyed = false;
-  response.writeHead = status => { response.status = status; };
-  response.end = body => { response.writableEnded = true; response.body = JSON.parse(body); };
+  response.writeHead = (status: any) => { response.status = status; };
+  response.end = (body: any) => { response.writableEnded = true; response.body = JSON.parse(body); };
   return response;
 }
 
-function fakeService(calls, agent = { id: 'card-a' }) {
+function fakeService(calls: any[], agent: any = { id: 'card-a' }): any {
   return {
-    ctx: { agents: { get: id => (id === 'card-a' ? agent : undefined) }, connection: { browserPeer: { id: 'browser' }, admit: () => ({ peer: { id: 'browser' } }) } },
-    execute: async (args, context) => { calls.push({ args, context }); return { ok: true, root: '/hanna' }; },
+    ctx: { agents: { get: (id: string) => (id === 'card-a' ? agent : undefined) }, connection: { browserPeer: { id: 'browser' }, admit: () => ({ peer: { id: 'browser' } }) } },
+    execute: async (args: any, context: any) => { calls.push({ args, context }); return { ok: true, root: '/hanna' }; },
   };
 }
 
 test('read-only observations resolve the session agent without the logged slash command', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createObserveHandler(fakeService(calls));
   const response = fakeResponse();
   await handler(fakeRequest(JSON.stringify({ sessionId: 'card-a', args: { action: 'project' } })), response);
@@ -40,7 +40,7 @@ test('read-only observations resolve the session agent without the logged slash 
 });
 
 test('the observation endpoint cannot be used for mutations', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createObserveHandler(fakeService(calls));
   for (const action of ['run', 'build', 'package', 'sign', 'install', 'uninstall', 'stop', 'connect', 'pair', 'cancel']) {
     const response = fakeResponse();
@@ -54,9 +54,9 @@ test('the observation endpoint cannot be used for mutations', async () => {
 });
 
 test('unknown sessions, foreign origins, missing headers and malformed bodies are rejected', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createObserveHandler(fakeService(calls), () => 'http://127.0.0.1:38163');
-  const cases = [
+  const cases: [any, Record<string, string>, number][] = [
     [{ sessionId: 'other', args: { action: 'project' } }, {}, 404],
     [{ sessionId: 'card-a', args: { action: 'project' } }, { origin: 'https://evil.example' }, 400],
   ];
@@ -77,7 +77,7 @@ test('unknown sessions, foreign origins, missing headers and malformed bodies ar
 });
 
 test('an unknown session is a 404 and never reaches the service', async () => {
-  const calls = [];
+  const calls: any[] = [];
   const handler = createObserveHandler(fakeService(calls));
   const response = fakeResponse();
   await handler(fakeRequest(JSON.stringify({ sessionId: 'missing', args: { action: 'jobs' } })), response);

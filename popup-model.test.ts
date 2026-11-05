@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MENU_INITIAL, menuReducer } from './ui-model.js';
+import { MENU_INITIAL, menuReducer } from './ui-model.ts';
 
-const at = type => menuReducer(MENU_INITIAL, { type });
+const at = (type: string) => menuReducer(MENU_INITIAL, { type });
 
 test('a menu starts closed, unpinned and unfocused', () => {
   assert.deepEqual(MENU_INITIAL, { open: false, pinned: false, focusWithin: false, pending: null });

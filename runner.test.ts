@@ -4,7 +4,7 @@ import { Readable } from 'node:stream';
 import { createRunner } from './runner.js';
 
 function provider() {
-  const calls = [];
+  const calls: any[] = [];
   const process = {
     stdout: Readable.from([Buffer.from('hello '), Buffer.from('世界')]),
     stderr: Readable.from(['warning']),
@@ -12,13 +12,13 @@ function provider() {
     terminate() { calls.push('terminate'); },
     async waitForExit() { calls.push('wait'); return true; },
   };
-  return { calls, process, async resolveExecutable(name) { calls.push(name); return '/usr/bin/' + name; }, spawn(spec) { calls.push(spec); return process; } };
+  return { calls, process, async resolveExecutable(name: string) { calls.push(name); return '/usr/bin/' + name; }, spawn(spec: any) { calls.push(spec); return process; } };
 }
 
 test('runner uses managed argv, stdin and bounded output, then awaits exit', async () => {
   const p = provider();
   const active = new Set();
-  const seen = [];
+  const seen: any[] = [];
   const result = await createRunner(p, { active, maxOutput: 6 })(['adb', 'pair', 'localhost:1234'], { cwd: '/project', stdin: '123456\n', onOutput: text => seen.push(text) });
   assert.equal(result.exitCode, 0);
   assert.equal(result.stdout, 'llo 世界');

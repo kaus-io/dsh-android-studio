@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": false
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "tests/**/*.ts",
+    "*.test.ts",
+    "build-client.ts",
+    "build-host.ts",
+    "smoke.ts"
+  ]
+}

@@ -7,26 +7,26 @@ import { AndroidWorkbench } from './android.js';
 import os from 'node:os';
 
 const ORIGIN = 'http://127.0.0.1:3080';
-function request(payload, headers = {}, method = 'POST') {
-  const req = Readable.from([Buffer.from(typeof payload === 'string' ? payload : JSON.stringify(payload))]);
+function request(payload: any, headers: Record<string, string | undefined> = {}, method = 'POST'): any {
+  const req: any = Readable.from([Buffer.from(typeof payload === 'string' ? payload : JSON.stringify(payload))]);
   req.method = method;
   req.headers = { 'x-awb-action': '1', 'content-type': 'application/json', origin: ORIGIN, ...headers };
   return req;
 }
-function response() {
-  const res = new EventEmitter();
+function response(): any {
+  const res: any = new EventEmitter();
   res.writableEnded = false;
   res.destroyed = false;
-  res.writeHead = status => { res.status = status; };
-  res.end = body => { res.writableEnded = true; res.body = JSON.parse(body); };
+  res.writeHead = (status: any) => { res.status = status; };
+  res.end = (body: any) => { res.writableEnded = true; res.body = JSON.parse(body); };
   return res;
 }
-function fixture(execute) {
-  const calls = [];
+function fixture(execute?: any) {
+  const calls: any[] = [];
   const agent = { id: 'android-card' };
-  const service = {
-    ctx: { agents: { get: id => id === agent.id ? agent : undefined }, connection: { browserPeer: { id: 'browser' }, admit: () => ({ peer: { id: 'browser' } }) }, commands: { execute: () => assert.fail('No command/chat writes allowed') } },
-    async execute(args, context) { calls.push({ args, context }); return execute ? execute(args, context) : { jobId: 'job-1' }; },
+  const service: any = {
+    ctx: { agents: { get: (id: string) => id === agent.id ? agent : undefined }, connection: { browserPeer: { id: 'browser' }, admit: () => ({ peer: { id: 'browser' } }) }, commands: { execute: () => assert.fail('No command/chat writes allowed') } },
+    async execute(args: any, context: any) { calls.push({ args, context }); return execute ? execute(args, context) : { jobId: 'job-1' }; },
   };
   return { calls, service, handler: createActionHandler(service, () => ORIGIN) };
 }
@@ -114,7 +114,7 @@ test('oversized bodies and mid-upload disconnects cannot launch work or hang a r
   await handler(large, largeRes);
   assert.equal(largeRes.status, 400);
   assert.equal(large.destroyed, true);
-  const stalled = new Readable({ read() {} });
+  const stalled: any = new Readable({ read() {} });
   stalled.method = 'POST';
   stalled.headers = { 'x-awb-action': '1', 'content-type': 'application/json', origin: ORIGIN };
   const closedRes = response();
@@ -129,8 +129,8 @@ test('oversized bodies and mid-upload disconnects cannot launch work or hang a r
 
 test('UI cancellation still refuses a job owned by another live session', async () => {
   const { service: stub } = fixture();
-  const killed = [];
-  stub.ctx.jobs = { kill: (...args) => { killed.push(args); return 'killed'; } };
+  const killed: any[] = [];
+  stub.ctx.jobs = { kill: (...args: any[]) => { killed.push(args); return 'killed'; } };
   const service = new HarnessAndroidService(stub.ctx);
   service.ownedJobs.set('foreign-job', 'another-session');
   const handler = createActionHandler(service, () => ORIGIN);
@@ -152,14 +152,14 @@ test('disconnect during a real short-operation service lifetime drains pending w
   t.after(() => { AndroidWorkbench.prototype.execute = original; });
   const res = response();
   let cleaned = false;
-  AndroidWorkbench.prototype.execute = async (_args, { signal }) => {
+  AndroidWorkbench.prototype.execute = (async (_args: any, { signal }: any) => {
     try {
       await new Promise((_resolve, reject) => {
         signal.addEventListener('abort', () => reject(signal.reason), { once: true });
         res.emit('close');
       });
     } finally { cleaned = true; }
-  };
+  }) as any;
   const handler = createActionHandler(service, () => ORIGIN);
   await handler(request({ sessionId: 'android-card', args: { action: 'connect', address: '127.0.0.1:5555' } }), res);
   assert.equal(res.status, 400);
@@ -171,7 +171,7 @@ test('disconnect during a real short-operation service lifetime drains pending w
 
 test('request cancellation aborts foreground work and failures are returned to the panel', async () => {
   const res = response();
-  const { handler } = fixture(async (_args, { signal }) => {
+  const { handler } = fixture(async (_args: any, { signal }: any) => {
     res.emit('close');
     assert.equal(signal.aborted, true);
     throw new Error('explicit operation failed');

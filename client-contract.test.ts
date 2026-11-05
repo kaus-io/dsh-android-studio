@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const text = name => fs.readFile(path.join(root, name), 'utf8');
+const text = (name: string) => fs.readFile(path.join(root, name), 'utf8');
 
 test('the shipped browser artifact bundles both halves of Android Studio', async () => {
   const client = await text('client.js');
@@ -13,7 +13,7 @@ test('the shipped browser artifact bundles both halves of Android Studio', async
   assert.ok(client.startsWith(`// Android Studio ${manifest.version}.`));
   assert.ok(client.includes(`window.__ModuleLoader__.load({ id: ${JSON.stringify(manifest.name)}`));
   assert.ok(client.includes('UI_RUNNING'), 'The shared interaction model must be bundled');
-  assert.ok(client.includes('@local/dsh-android-studio/code-reader'), 'The merged code reader must be bundled');
+  assert.ok(client.includes('@kaus-io/dsh-android-studio/code-reader'), 'The merged code reader must be bundled');
   assert.ok(client.includes('androidStudioCodeReader'), 'The merged reader keeps its own locale namespace');
   assert.ok(client.includes('sidebar.right.tab.document'), 'The merged reader registers a document body');
   assert.ok(!client.includes('/* ANDROID_WORKBENCH_MODEL */'));
@@ -22,7 +22,7 @@ test('the shipped browser artifact bundles both halves of Android Studio', async
 
 test('the plugin uses real Harness slots, one React identity and only DSH theme tokens', async () => {
   const client = await text('client.js');
-  const source = await text('client.view.js');
+  const source = await text('client.view.ts');
   const manifest = JSON.parse(await text('package.json'));
   assert.equal((source.match(/import \* as React from 'react'/g) || []).length, 1);
   assert.ok(!/require\(\s*['"]react['"]\s*\)/.test(source), 'The programmatic React factory is now an import');
@@ -52,7 +52,7 @@ test('the plugin uses real Harness slots, one React identity and only DSH theme 
   assert.ok(source.includes('OBSERVE_ACTIONS.has(args.action)') && source.includes('ACTION_PATH'), 'Observations and mutations use distinct silent endpoints');
   assert.ok(!source.includes('ctx.remote.commands.execute') && !source.includes('remote.commands'), 'No toolbar action or task cancellation may enter the chat-logged command lifecycle');
   assert.ok(source.includes('fetch(ACTION_PATH'), 'Sidebar cancellation also uses the explicit action endpoint');
-  assert.equal(manifest.name, '@local/dsh-android-studio');
+  assert.equal(manifest.name, '@kaus-io/dsh-android-studio');
   assert.ok(!/document\.body|sessionStorage|window\.confirm|<iframe/.test(source));
   assert.ok(!/localStorage\.(?:setItem|getItem)\(\s*(?!SELECTION_STORAGE_KEY)/.test(source), 'Only the dedicated selection key may use browser storage');
   /* The Android half owns this rule; the reader carries its own syntax palette. */
@@ -62,7 +62,7 @@ test('the plugin uses real Harness slots, one React identity and only DSH theme 
 });
 
 test('sidebar services are declared in inject before property access', async () => {
-  const source = await text('client.view.js');
+  const source = await text('client.view.ts');
   const match = source.match(/export const inject = \[([^\]]*)\]/);
   assert.ok(match, 'The browser plugin must declare its Cordis service dependencies');
   for (const service of ['sidebarRightTabs', 'sidebarRight']) assert.ok(match[1].includes(`'${service}'`), `Missing service dependency: ${service}`);
@@ -80,14 +80,14 @@ test('the merged entry wires both halves and the reader service', async () => {
 });
 
 test('all literal UI labels resolve in balanced English and Chinese dictionaries', async () => {
-  const dictionaries = {};
+  const dictionaries: Record<string, Record<string, string>> = {};
   for (const id of ['en', 'zh']) {
-    const locale = JSON.parse(await text(`locale/${id}.json`));
+    const locale = JSON.parse(await text(`locale/${id}.json`)) as { meta: { title: string; description: string }; ui: Record<string, string> };
     assert.ok(locale.meta.title && locale.meta.description);
     dictionaries[id] = locale.ui;
   }
   assert.deepEqual(Object.keys(dictionaries.en).sort(), Object.keys(dictionaries.zh).sort());
-  const source = await text('client.view.js');
+  const source = await text('client.view.ts');
   for (const match of source.matchAll(/\bt\(\s*['"]([^'"]+)['"]\s*[,)]/g)) {
     const key = match[1];
     assert.ok(Object.hasOwn(dictionaries.en, key), `Missing English UI label: ${key}`);
@@ -96,7 +96,7 @@ test('all literal UI labels resolve in balanced English and Chinese dictionaries
 });
 
 test('task output targets the right sidebar and Gradle sync has feedback', async () => {
-  const source = await text('client.view.js');
+  const source = await text('client.view.ts');
   assert.ok(source.includes('syncOpen && h(SyncDialog'), 'the sync confirmation dialog must be rendered');
   assert.ok(source.includes('onSync: runSync'), 'confirming the dialog must start the Gradle sync');
   assert.ok(source.includes('if (reveal) openTasksTab();'), 'new jobs must open the tasks sidebar');
@@ -126,5 +126,5 @@ test('runtime exports and linked distribution resources exist without install sc
   assert.equal(manifest.exports['./locale/*.json'], './locale/*.json');
   assert.equal(manifest.exports['./icon'], './icon.svg');
   assert.ok(!manifest.scripts?.preinstall && !manifest.scripts?.postinstall);
-  for (const file of ['index.js', 'runner.js', 'android.js', 'client.js', 'client.view.js', 'ui-model.js', 'build-client.mjs', 'src/client.tsx', 'src/reader/plugin.tsx', 'tsconfig.json', 'icon.svg', 'locale/en.json', 'locale/zh.json', 'cordis.patch.yml']) assert.ok((await fs.stat(path.join(root, file))).isFile());
+  for (const file of ['index.js', 'runner.js', 'android.js', 'client.js', 'client.view.ts', 'ui-model.ts', 'build-client.ts', 'src/client.tsx', 'src/reader/plugin.tsx', 'tsconfig.json', 'icon.svg', 'locale/en.json', 'locale/zh.json', 'cordis.patch.yml']) assert.ok((await fs.stat(path.join(root, file))).isFile());
 });

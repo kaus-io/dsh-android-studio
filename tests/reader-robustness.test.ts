@@ -19,7 +19,7 @@ const ALPHABET = [
   'f', 'n', 'u', 'c', 't', 'i', 'o', 'r', 'e', 's', 'l', 'p', 'v', 'd',
 ]
 
-function randomText(length, seed) {
+function randomText(length: number, seed: number): string {
   let value = 0
   for (let index = 0; index < seed.toString().length; index++) value = (value * 31 + seed.toString().charCodeAt(index)) >>> 0
   let out = ''
@@ -30,7 +30,9 @@ function randomText(length, seed) {
   return out
 }
 
-function assertContiguous(text, tokens) {
+type Tokens = ReturnType<typeof analyzeText>['tokens']
+
+function assertContiguous(text: string, tokens: Tokens): void {
   const lines = splitLines(text)
   assert.equal(tokens.length, lines.length, 'one token row per line')
   for (let line = 0; line < lines.length; line++) {
@@ -59,7 +61,7 @@ test('every language scanner survives random input with full coverage', () => {
 })
 
 test('truncated constructs do not leak state into unrelated lines', () => {
-  const cases = [
+  const cases: Array<[string, string]> = [
     ['kotlin', '/* never closed\nval x = 1\nval y = 2'],
     ['python', '"""never closed\nx = 1\n'],
     ['typescript', '`template\nconst x = 1'],

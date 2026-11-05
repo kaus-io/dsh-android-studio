@@ -49,10 +49,12 @@ UI 按钮通过显式操作端点（签名走专用密码端点）执行明确�
 
 ## 本地验证
 
-前端维护 `client.view.js`、纯交互规则 `ui-model.js` 和合并进来的代码阅读器 `src/reader/`，中英词典来自 `locale/*.json`。合并入口是 `src/client.tsx`；执行 `node build-client.mjs` 生成实际加载的 `client.js`，不要直接修改生成文件。构建只打包同一插件的 JS，不生成 mock 页面、独立应用或 DOM 模拟器。
+前端维护 `client.view.ts`、纯交互规则 `ui-model.ts` 和合并进来的代码阅读器 `src/reader/`，中英词典来自 `locale/*.json`。合并入口是 `src/client.tsx`；执行 `pnpm run build`（先把 `*.ts` 工具编译成 `.mjs`，再生成 Host 的 `index.js` / `runner.js` / `android.js` 与客户端 `client.js`），不要直接修改生成文件。构建只打包同一插件的 JS，不生成 mock 页面、独立应用或 DOM 模拟器。
 
-代码阅读器注册为 document preview 实现 `@local/dsh-android-studio/code-reader`，使用 `androidStudioCodeReader` 词典命名空间和独立样式标签；不要把阅读器拆回独立插件包，也不要把阅读器拆成第二个客户端模块。阅读器视觉是 Xcode Light/Dark 的紧凑编辑器（顶部文件名 + 面包屑），不要改回 VS Code 的文件 tab、minimap、状态栏、缩进竖线或 IDEA 配色。插件页显示名是 **Android Studio**。
+代码阅读器注册为 document preview 实现 `@kaus-io/dsh-android-studio/code-reader`，使用 `androidStudioCodeReader` 词典命名空间和独立样式标签；不要把阅读器拆回独立插件包，也不要把阅读器拆成第二个客户端模块。阅读器视觉是 Xcode Light/Dark 的紧凑编辑器（顶部文件名 + 面包屑），不要改回 VS Code 的文件 tab、minimap、状态栏、缩进竖线或 IDEA 配色。插件页显示名是 **Android Studio**。
 
-在本目录执行 `pnpm install && node build-client.mjs --check && npm test`；`npm test` 覆盖 Android 纯状态转换、Host 串行构建签名流程、权限/设备边界、资源取消，以及 `tests/` 下的阅读器词法/折叠/大纲/查找/布局测试。测试使用独占临时目录和注入 runner，不操作真实设备、签名密钥或真实 Gradle。安装使用 Harness `plugin_manager install_bundle`，不要手工修改 profile 文件。
+在本目录执行 `pnpm install && pnpm test && pnpm run check:versions`；`pnpm test` 覆盖 Android 纯状态转换、Host 串行构建签名流程、权限/设备边界、资源取消、`tests/` 下的阅读器词法/折叠/大纲/查找/布局测试，以及提交产物和版本脚本。测试通过 `./index.js` / `./android.js` / `./runner.js` 引入 Host（类型检查解析到同名 `.ts`），这样 `AndroidWorkbench.prototype` 的 mock 与 `index.js` 内部使用的是同一模块实例；因此 `pnpm test` 必须先跑 `build:host`。测试使用独占临时目录和注入 runner，不操作真实设备、签名密钥或真实 Gradle。本地调试仍可用 Harness `plugin_manager install_bundle` 安装 `link:/本目录`，不要手工修改 profile 文件。
+
+发布走 GitHub Release：`pnpm run check:versions` 校验清单、`client.js` 横幅、文档固定版本与 `CHANGELOG.md`，`.github/workflows/release.yml` 只在 Release 发布时把 `@kaus-io/dsh-android-studio` 发到 npm；同一版本重发视为完成，不覆盖已发布内容。
 
 本地安装链接本目录；移动或删除目录会影响插件。修改已安装运行时代码后，以安装结果为准决定是否需要重启，不从 slot id 推断模块已更新。

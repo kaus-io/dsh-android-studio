@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sessionSelectionKey, popupGeometry, showSessionToolbar } from './ui-model.js';
+import { sessionSelectionKey, popupGeometry, showSessionToolbar } from './ui-model.ts';
 
 test('ordinary, pending and unrecognized sessions have no Android toolbar', () => {
   for (const project of [undefined, null, {}, { modules: null }, { modules: [] }, { root: '/web-project', modules: [] }]) assert.equal(showSessionToolbar(project), false);
@@ -57,24 +57,24 @@ test('all menu and inspector geometries remain inside their viewport', () => {
 });
 
 test('only non-secret selection state may be persisted', async () => {
-  const { sanitizeSelection } = await import('./ui-model.js');
+  const { sanitizeSelection } = await import('./ui-model.ts');
   const stored = sanitizeSelection({ modulePath: ':app-hanna', variant: 'Debug', serial: '192.168.0.2:5555', keystore: '/keys/release.jks', alias: 'release', storePassword: 'secret-a', keyPassword: 'secret-b', credentials: { storePassword: 'x' }, variantsByModule: { ':app-hanna': 'Debug', ':app:odd': 42 }, keystores: ['/k/a.jks', '/k/a.jks', '/k/b.jks', 7] });
   assert.deepEqual(stored, { modulePath: ':app-hanna', variant: 'Debug', serial: '192.168.0.2:5555', keystore: '/keys/release.jks', alias: 'release', variantsByModule: { ':app-hanna': 'Debug' }, keystores: ['/k/a.jks', '/k/b.jks'] });
   assert.equal(JSON.stringify(stored).includes('secret'), false);
 });
 
 test('corrupt or oversized storage entries cannot escape the whitelist', async () => {
-  const { sanitizeSelection } = await import('./ui-model.js');
+  const { sanitizeSelection } = await import('./ui-model.ts');
   assert.deepEqual(sanitizeSelection(null), {});
   assert.deepEqual(sanitizeSelection('nope'), {});
   assert.deepEqual(sanitizeSelection({ keystore: 123, alias: null }), {});
-  assert.equal(sanitizeSelection({ variant: 'x'.repeat(500) }).variant.length, 128);
-  assert.equal(sanitizeSelection({ keystores: Array.from({ length: 20 }, (_, i) => '/k/' + i) }).keystores.length, 8);
+  assert.equal(sanitizeSelection({ variant: 'x'.repeat(500) }).variant!.length, 128);
+  assert.equal(sanitizeSelection({ keystores: Array.from({ length: 20 }, (_, i) => '/k/' + i) }).keystores!.length, 8);
   assert.equal('variantsByModule' in sanitizeSelection({ variantsByModule: { a: 1 } }), false);
 });
 
 test('ADB Wi-Fi targets compose from IP and port without duplicating a port', async () => {
-  const { wirelessAddress, isWirelessSerial } = await import('./ui-model.js');
+  const { wirelessAddress, isWirelessSerial } = await import('./ui-model.ts');
   assert.equal(wirelessAddress(' 192.168.1.23 ', '5555'), '192.168.1.23:5555');
   assert.equal(wirelessAddress('192.168.1.23', ''), '192.168.1.23:5555');
   assert.equal(wirelessAddress('192.168.1.23:7575', '5555'), '192.168.1.23:7575');
